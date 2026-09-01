@@ -1,5 +1,5 @@
 [project]
-name = "model-scan"
+name = "weightguard"
 version = "0.1.0"
 description = "Multi-format security scanner for ML model artifacts (pickle/PyTorch, Keras, ONNX, GGUF, SafeTensors) with provenance and license checks."
 readme = "README.md"
@@ -8,8 +8,8 @@ authors = [
     { name = "Sanjeev Jaiswal", email = "jassics@gmail.com" }
 ]
 requires-python = ">=3.11"
-urls.Homepage = "https://github.com/jassics/model-scan"
-urls.Repository = "https://github.com/jassics/model-scan"
+urls.Homepage = "https://github.com/jassics/weightguard"
+urls.Repository = "https://github.com/jassics/weightguard"
 dependencies = [
     "typer>=0.12",
     "rich>=13.7",

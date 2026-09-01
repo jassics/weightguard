@@ -17,7 +17,7 @@ def version() -> None:
     """Print the modelsec version."""
     from importlib.metadata import version as _v
 
-    console.print(_v("model-scan"))
+    console.print(_v("weightguard"))
 
 
 @app.command(name="scan")

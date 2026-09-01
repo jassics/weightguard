@@ -1,4 +1,4 @@
-# model-scan
+# weightguard
 
 Security scanner for ML model artifacts. Point it at a Hugging Face repo, a git
 URL, or a local path, and it flags known artifact-level risks — malicious
@@ -8,13 +8,13 @@ concrete mitigation for each finding.
 
 Model files are not inert data. Several common serialization formats can
 embed code that executes the moment the file is *loaded*, before any
-inference happens. `model-scan` is a static, pre-load check you run before
+inference happens. `weightguard` is a static, pre-load check you run before
 trusting a downloaded model.
 
 ## Install
 
 ```bash
-pip install model-scan
+pip install weightguard
 ```
 
 ## Usage
