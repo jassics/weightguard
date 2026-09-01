@@ -1,0 +1,38 @@
+[project]
+name = "model-scan"
+version = "0.1.0"
+description = "Multi-format security scanner for ML model artifacts (pickle/PyTorch, Keras, ONNX, GGUF, SafeTensors) with provenance and license checks."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Sanjeev Jaiswal", email = "jassics@gmail.com" }
+]
+requires-python = ">=3.11"
+urls.Homepage = "https://github.com/jassics/model-scan"
+urls.Repository = "https://github.com/jassics/model-scan"
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "pydantic>=2.7",
+    "fickling>=0.1.12",
+    "safetensors>=0.8.0",
+    "huggingface-hub>=1.28.0",
+    "gguf>=0.19.0",
+    "h5py>=3.16.0",
+    "onnx>=1.22.0",
+]
+
+[project.scripts]
+modelsec = "modelsec.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.9.2,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "modelsec"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
