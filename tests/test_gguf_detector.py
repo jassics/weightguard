@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from modelsec.detectors.gguf_detector import GgufDetector
+from weightguard.detectors.gguf_detector import GgufDetector
 
 
 def test_valid_gguf_has_no_findings(gguf_valid_model: Path) -> None:

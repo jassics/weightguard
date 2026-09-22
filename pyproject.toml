@@ -1,7 +1,7 @@
 [project]
 name = "weightguard"
-version = "0.1.0"
-description = "Multi-format security scanner for ML model artifacts (pickle/PyTorch, Keras, ONNX, GGUF, SafeTensors) with provenance and license checks."
+version = "0.1.1"
+description = "Multi-format security scanner for ML model artifacts: pickle/PyTorch, Keras Lambda-layer, ONNX custom-op, and GGUF header checks."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -23,14 +23,14 @@ dependencies = [
 ]
 
 [project.scripts]
-modelsec = "modelsec.cli:app"
+weightguard = "weightguard.cli:app"
 
 [build-system]
 requires = ["uv_build>=0.9.2,<0.10.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "modelsec"
+module-name = "weightguard"
 
 [dependency-groups]
 dev = [

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import h5py
 
-from modelsec.models import Finding, Severity
+from weightguard.models import Finding, Severity
 
 KERAS_EXTENSIONS = {".h5", ".hdf5", ".keras"}
 

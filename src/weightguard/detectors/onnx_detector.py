@@ -4,7 +4,7 @@ from pathlib import Path
 
 import onnx
 
-from modelsec.models import Finding, Severity
+from weightguard.models import Finding, Severity
 
 ONNX_EXTENSIONS = {".onnx"}
 

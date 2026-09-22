@@ -6,7 +6,7 @@ from fickling.analysis import Severity as FicklingSeverity
 from fickling.analysis import check_safety
 from fickling.fickle import Pickled
 
-from modelsec.models import Finding, Severity
+from weightguard.models import Finding, Severity
 
 PICKLE_EXTENSIONS = {".pkl", ".pickle", ".bin", ".pt", ".pth"}
 

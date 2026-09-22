@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Protocol
 
-from modelsec.models import Finding
+from weightguard.models import Finding
 
 
 class Detector(Protocol):

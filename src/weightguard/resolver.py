@@ -41,13 +41,13 @@ def _resolve_huggingface(url_path: str) -> Path:
 
     from huggingface_hub import snapshot_download
 
-    local_dir = Path(tempfile.mkdtemp(prefix="modelsec-hf-"))
+    local_dir = Path(tempfile.mkdtemp(prefix="weightguard-hf-"))
     snapshot_download(repo_id=repo_id, local_dir=str(local_dir))
     return local_dir
 
 
 def _resolve_git(url: str) -> Path:
-    local_dir = Path(tempfile.mkdtemp(prefix="modelsec-git-"))
+    local_dir = Path(tempfile.mkdtemp(prefix="weightguard-git-"))
     subprocess.run(
         ["git", "clone", "--depth", "1", url, str(local_dir)],
         check=True,

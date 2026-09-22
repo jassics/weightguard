@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from modelsec.detectors.keras_detector import KerasDetector
-from modelsec.models import Severity
+from weightguard.detectors.keras_detector import KerasDetector
+from weightguard.models import Severity
 
 
 def test_lambda_layer_is_flagged_critical(keras_lambda_layer_h5: Path) -> None:

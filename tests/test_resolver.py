@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from modelsec.resolver import UnresolvableTarget, resolve
+from weightguard.resolver import UnresolvableTarget, resolve
 
 
 def test_local_path_passthrough(tmp_path: Path) -> None:
@@ -15,7 +15,7 @@ def test_nonexistent_path_is_unresolvable() -> None:
 
 
 def test_hf_url_regex_parses_repo_id() -> None:
-    from modelsec.resolver import _HF_REPO_RE
+    from weightguard.resolver import _HF_REPO_RE
 
     m = _HF_REPO_RE.match("/mcpotato/42-eicar-street/tree/main")
     assert m.group("repo_id") == "mcpotato/42-eicar-street"

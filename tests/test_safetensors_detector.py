@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from modelsec.detectors.safetensors_detector import SafeTensorsDetector
+from weightguard.detectors.safetensors_detector import SafeTensorsDetector
 
 
 def test_valid_safetensors_has_no_findings(valid_safetensors: Path) -> None:

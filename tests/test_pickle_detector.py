@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from modelsec.detectors.pickle_detector import PickleDetector
-from modelsec.models import Severity
-from modelsec.scanner import scan_path
+from weightguard.detectors.pickle_detector import PickleDetector
+from weightguard.models import Severity
+from weightguard.scanner import scan_path
 
 
 def test_flags_malicious_pickle_as_critical(malicious_pickle: Path) -> None:

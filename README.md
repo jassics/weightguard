@@ -21,16 +21,16 @@ pip install weightguard
 
 ```bash
 # Hugging Face repo
-modelsec scan https://huggingface.co/<org>/<repo>
+weightguard scan https://huggingface.co/<org>/<repo>
 
 # git repo
-modelsec scan https://github.com/<org>/<repo>.git
+weightguard scan https://github.com/<org>/<repo>.git
 
 # local path
-modelsec scan /path/to/model
+weightguard scan /path/to/model
 
 # CI gate — exit non-zero only above a severity threshold (default: HIGH)
-modelsec scan <target> --fail-on CRITICAL
+weightguard scan <target> --fail-on CRITICAL
 ```
 
 Exit codes: `0` clean, `1` a finding at/above `--fail-on`, `2` target could

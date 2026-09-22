@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from modelsec.detectors import ALL_DETECTORS
-from modelsec.models import Report
+from weightguard.detectors import ALL_DETECTORS
+from weightguard.models import Report
 
 
 def scan_path(target: Path) -> Report:

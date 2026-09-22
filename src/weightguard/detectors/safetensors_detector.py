@@ -4,7 +4,7 @@ from pathlib import Path
 
 from safetensors import safe_open
 
-from modelsec.models import Finding, Severity
+from weightguard.models import Finding, Severity
 
 SAFETENSORS_EXTENSIONS = {".safetensors"}
 

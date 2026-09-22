@@ -1,5 +1,5 @@
-from modelsec.detectors.onnx_detector import OnnxDetector
-from modelsec.models import Severity
+from weightguard.detectors.onnx_detector import OnnxDetector
+from weightguard.models import Severity
 
 
 def test_standard_onnx_model_has_no_findings(onnx_standard_model) -> None:

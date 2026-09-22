@@ -4,17 +4,17 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from modelsec.models import Severity
-from modelsec.resolver import UnresolvableTarget, resolve
-from modelsec.scanner import scan_path
+from weightguard.models import Severity
+from weightguard.resolver import UnresolvableTarget, resolve
+from weightguard.scanner import scan_path
 
-app = typer.Typer(help="modelsec — security scanner for ML model artifacts.", no_args_is_help=True)
+app = typer.Typer(help="weightguard — security scanner for ML model artifacts.", no_args_is_help=True)
 console = Console()
 
 
 @app.command(name="version")
 def version() -> None:
-    """Print the modelsec version."""
+    """Print the weightguard version."""
     from importlib.metadata import version as _v
 
     console.print(_v("weightguard"))
@@ -38,7 +38,7 @@ def scan(
         console.print(f"[green]No findings.[/green] Scanned: {target}")
         raise typer.Exit(code=0)
 
-    table = Table(title=f"modelsec findings — {target}")
+    table = Table(title=f"weightguard findings — {target}")
     table.add_column("Severity")
     table.add_column("Detector")
     table.add_column("Title")

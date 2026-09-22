@@ -5,7 +5,7 @@ from pathlib import Path
 import gguf
 from gguf.constants import GGUFValueType
 
-from modelsec.models import Finding, Severity
+from weightguard.models import Finding, Severity
 
 GGUF_EXTENSIONS = {".gguf"}
 
