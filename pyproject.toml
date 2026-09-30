@@ -1,6 +1,6 @@
 [project]
 name = "weightguard"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-format security scanner for ML model artifacts: pickle/PyTorch, Keras Lambda-layer, ONNX custom-op, and GGUF header checks."
 readme = "README.md"
 license = "MIT"

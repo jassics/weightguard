@@ -4,9 +4,9 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from weightguard import resolve, scan_path
 from weightguard.models import Severity
-from weightguard.resolver import UnresolvableTarget, resolve
-from weightguard.scanner import scan_path
+from weightguard.resolver import UnresolvableTarget
 
 app = typer.Typer(help="weightguard — security scanner for ML model artifacts.", no_args_is_help=True)
 console = Console()

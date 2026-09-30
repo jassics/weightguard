@@ -36,6 +36,39 @@ weightguard scan <target> --fail-on CRITICAL
 Exit codes: `0` clean, `1` a finding at/above `--fail-on`, `2` target could
 not be resolved.
 
+## Use as a library
+
+The CLI is a thin wrapper over the same public API — import it directly to
+scan programmatically (CI scripts, pre-deploy hooks, MLOps pipelines):
+
+```python
+from weightguard import scan, Severity, UnresolvableTarget
+
+try:
+    report = scan("https://huggingface.co/<org>/<repo>")  # or a git URL / local path
+except UnresolvableTarget as exc:
+    raise SystemExit(f"could not resolve target: {exc}")
+
+for finding in report.findings:
+    print(finding.severity, finding.detector, finding.title, finding.file)
+
+if report.fails(Severity.HIGH):
+    raise SystemExit("blocking: high-severity finding in model artifact")
+```
+
+Lower-level pieces are also exported if you want to resolve and scan
+separately, or scan a `pathlib.Path` you already have on disk:
+
+```python
+from weightguard import resolve, scan_path
+
+path = resolve("https://github.com/<org>/<repo>.git")  # downloads, returns local Path
+report = scan_path(path)
+```
+
+`scan_path` never executes or deserializes the target files — it's pure
+static analysis, safe to run against untrusted artifacts.
+
 ## What it checks today
 
 | Format | Detector | Technique |
