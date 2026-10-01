@@ -7,7 +7,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from weightguard import scan as run_scan
+from weightguard import MODEL_EXTENSIONS, scan as run_scan
 from weightguard.models import Report, Severity
 from weightguard.report_format import to_json, to_sarif
 from weightguard.resolver import UnresolvableTarget
@@ -28,6 +28,17 @@ def version() -> None:
     from importlib.metadata import version as _v
 
     console.print(_v("weightguard"))
+
+
+@app.command(name="list-extensions")
+def list_extensions() -> None:
+    """Print every file extension weightguard's detectors recognize, one per line.
+
+    Intended for scripting (e.g. filtering a changed-file list in CI) rather
+    than human reading.
+    """
+    for ext in sorted(MODEL_EXTENSIONS):
+        print(ext)
 
 
 @app.command(name="scan")

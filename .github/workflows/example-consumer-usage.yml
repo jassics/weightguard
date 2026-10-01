@@ -1,0 +1,47 @@
+# This is a reference workflow showing how a DOWNSTREAM repo would use the
+# weightguard GitHub Action. It is not run in this repo's own CI (see
+# ci.yml for that) — copy this into a consuming repo's .github/workflows/.
+name: weightguard model scan
+
+on:
+  pull_request:
+    paths:
+      - "**.pkl"
+      - "**.pickle"
+      - "**.bin"
+      - "**.pt"
+      - "**.pth"
+      - "**.npy"
+      - "**.npz"
+      - "**.joblib"
+      - "**.jbl"
+      - "**.h5"
+      - "**.hdf5"
+      - "**.keras"
+      - "**.onnx"
+      - "**.gguf"
+      - "**.safetensors"
+
+permissions:
+  contents: read
+  security-events: write # required to upload SARIF to the Security tab
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, needed to diff against the PR base
+
+      - name: Scan changed model artifacts
+        id: weightguard
+        uses: jassics/weightguard@v0.2.0
+        with:
+          fail-on: HIGH
+
+      - name: Upload SARIF to GitHub code scanning
+        if: always() && steps.weightguard.outputs.sarif-file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.weightguard.outputs.sarif-file }}

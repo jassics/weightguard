@@ -1,0 +1,141 @@
+name: "weightguard"
+description: "Scan ML model artifacts (pickle/PyTorch, NumPy, Joblib, Keras, ONNX, GGUF, SafeTensors) for known security risks before they're trusted or deployed."
+author: "Sanjeev Jaiswal"
+branding:
+  icon: "shield"
+  color: "red"
+
+inputs:
+  target:
+    description: >
+      What to scan. Defaults to "changed", which scans only model-artifact
+      files changed versus `base-ref` (fast, typical PR-gate behavior). Set
+      to a path (e.g. ".") to scan the whole checkout, or to a Hugging Face
+      repo URL / git URL to scan a remote target directly.
+    required: false
+    default: "changed"
+  base-ref:
+    description: "Git ref to diff against when target=changed. Defaults to the PR base branch, falling back to the previous commit on push."
+    required: false
+    default: ""
+  fail-on:
+    description: "Exit non-zero if a finding at/above this severity is present: CRITICAL, HIGH, MEDIUM, LOW, INFO."
+    required: false
+    default: "HIGH"
+  format:
+    description: "Output format: table, json, or sarif."
+    required: false
+    default: "sarif"
+  provenance:
+    description: "For Hugging Face targets, also check repo-metadata risk signals."
+    required: false
+    default: "true"
+  apply-policy:
+    description: "Apply a .weightguard.yml allowlist from the target directory, if present."
+    required: false
+    default: "true"
+  version:
+    description: "weightguard PyPI version to install. Defaults to latest."
+    required: false
+    default: ""
+  sarif-output:
+    description: "Path to write SARIF output to, for upload via github/codeql-action/upload-sarif."
+    required: false
+    default: "weightguard-results.sarif"
+
+outputs:
+  sarif-file:
+    description: "Path to the generated SARIF file (only when format=sarif)."
+    value: ${{ steps.scan.outputs.sarif-file }}
+  scanned-count:
+    description: "Number of files that were scanned."
+    value: ${{ steps.targets.outputs.count }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install weightguard
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -n "${{ inputs.version }}" ]; then
+          pip install "weightguard==${{ inputs.version }}"
+        else
+          pip install weightguard
+        fi
+
+    - name: Resolve scan directory
+      id: targets
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [ "${{ inputs.target }}" != "changed" ]; then
+          echo "scan-path=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+          echo "count=unknown" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        base_ref="${{ inputs.base-ref }}"
+        if [ -z "$base_ref" ]; then
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+          else
+            base_ref="HEAD~1"
+          fi
+        fi
+
+        pattern=$(weightguard list-extensions | sed 's/\./\\./g' | paste -sd '|' -)
+
+        changed=$(git diff --name-only --diff-filter=ACMR "$base_ref" HEAD -- . | grep -E "($pattern)\$" || true)
+
+        staging_dir="$RUNNER_TEMP/weightguard-changed"
+        mkdir -p "$staging_dir"
+        count=0
+        if [ -n "$changed" ]; then
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            [ -f "$f" ] || continue
+            mkdir -p "$staging_dir/$(dirname "$f")"
+            cp "$f" "$staging_dir/$f"
+            count=$((count + 1))
+          done <<< "$changed"
+        fi
+
+        echo "scan-path=$staging_dir" >> "$GITHUB_OUTPUT"
+        echo "count=$count" >> "$GITHUB_OUTPUT"
+
+    - name: Scan
+      id: scan
+      shell: bash
+      run: |
+        set -uo pipefail
+
+        if [ "${{ steps.targets.outputs.count }}" = "0" ]; then
+          echo "No changed model-artifact files; nothing to scan."
+          exit 0
+        fi
+
+        prov_flag="--provenance"
+        [ "${{ inputs.provenance }}" = "false" ] && prov_flag="--no-provenance"
+        policy_flag="--apply-policy"
+        [ "${{ inputs.apply-policy }}" = "false" ] && policy_flag="--no-apply-policy"
+
+        if [ "${{ inputs.format }}" = "sarif" ]; then
+          weightguard scan "${{ steps.targets.outputs.scan-path }}" \
+            --fail-on "${{ inputs.fail-on }}" --format sarif $prov_flag $policy_flag \
+            > "${{ inputs.sarif-output }}"
+          exit_code=$?
+          echo "sarif-file=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
+        else
+          weightguard scan "${{ steps.targets.outputs.scan-path }}" \
+            --fail-on "${{ inputs.fail-on }}" --format "${{ inputs.format }}" $prov_flag $policy_flag
+          exit_code=$?
+        fi
+
+        exit $exit_code

@@ -111,6 +111,44 @@ scanned file — an audit trail of exactly what was scanned) and
 `report.provenance` (supply-chain signals, see below). Serialize either with
 `weightguard.report_format.to_json`/`to_sarif`.
 
+## GitHub Action
+
+Gate pull requests that touch model artifacts, without installing anything
+locally:
+
+```yaml
+# .github/workflows/weightguard.yml
+on: pull_request
+
+permissions:
+  contents: read
+  security-events: write   # to upload SARIF to the Security tab
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, needed to diff against the PR base
+
+      - uses: jassics/weightguard@v0.2.0
+        id: weightguard
+        with:
+          fail-on: HIGH
+
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.weightguard.outputs.sarif-file
+        with:
+          sarif_file: ${{ steps.weightguard.outputs.sarif-file }}
+```
+
+By default (`target: changed`) it scans only the model-artifact files
+changed in the PR — fast even on repos with many pre-existing weights. Set
+`target: .` to scan the whole checkout, or `target: <HF/git URL>` to scan a
+remote repo directly. See [`action.yml`](action.yml) for all inputs
+(`fail-on`, `format`, `provenance`, `apply-policy`, `version`).
+
 ## What it checks today
 
 | Format | Detector | Technique |

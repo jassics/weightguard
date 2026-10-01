@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from weightguard.detectors import MODEL_EXTENSIONS
 from weightguard.models import Finding, FileRecord, ProvenanceSignal, Report, Severity
 from weightguard.policy import Policy
 from weightguard.resolver import UnresolvableTarget, hf_repo_id, resolve
@@ -15,6 +16,7 @@ __all__ = [
     "Severity",
     "Policy",
     "UnresolvableTarget",
+    "MODEL_EXTENSIONS",
     "resolve",
     "scan_path",
     "scan",

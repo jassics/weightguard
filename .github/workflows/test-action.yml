@@ -1,0 +1,59 @@
+name: Test Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build a known-malicious fixture and a benign commit
+        run: |
+          mkdir -p /tmp/wg-fixture
+          python3 -c "
+          import pickle
+          class P:
+              def __reduce__(self):
+                  return (eval, (\"'EICAR-STANDARD-ANTIVIRUS-TEST-FILE'\",))
+          open('/tmp/wg-fixture/malicious.pkl', 'wb').write(pickle.dumps(P()))
+          "
+          git config user.email "ci@example.com"
+          git config user.name "ci"
+          cp /tmp/wg-fixture/malicious.pkl malicious.pkl
+          git add malicious.pkl
+          git commit -m "test: add known-malicious pickle fixture"
+
+      - name: Run weightguard action (expect failure)
+        id: weightguard
+        continue-on-error: true
+        uses: ./
+        with:
+          fail-on: HIGH
+          format: sarif
+
+      - name: Assert the action failed on the malicious fixture
+        run: |
+          if [ "${{ steps.weightguard.outcome }}" != "failure" ]; then
+            echo "Expected the action to fail on a known-malicious pickle, but it reported: ${{ steps.weightguard.outcome }}"
+            exit 1
+          fi
+          echo "OK: action correctly failed on malicious fixture."
+
+      - name: Assert SARIF output exists and has a result
+        run: |
+          test -f "${{ steps.weightguard.outputs.sarif-file }}"
+          count=$(jq '.runs[0].results | length' "${{ steps.weightguard.outputs.sarif-file }}")
+          if [ "$count" -lt 1 ]; then
+            echo "Expected at least one SARIF result, got $count"
+            exit 1
+          fi
+          echo "OK: SARIF has $count result(s)."
+
+      - name: Revert the fixture commit
+        run: git reset --hard HEAD~1
