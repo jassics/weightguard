@@ -1,5 +1,9 @@
 # weightguard
 
+[![PyPI](https://img.shields.io/pypi/v/weightguard)](https://pypi.org/project/weightguard/)
+[![CI](https://github.com/jassics/weightguard/actions/workflows/ci.yml/badge.svg)](https://github.com/jassics/weightguard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Security scanner for ML model artifacts. Point it at a Hugging Face repo, a git
 URL, or a local path, and it flags known artifact-level risks — malicious
 pickle/PyTorch payloads, Keras `Lambda`-layer code injection, ONNX custom-op
