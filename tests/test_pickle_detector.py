@@ -21,3 +21,14 @@ def test_scan_path_walks_directory_and_fails_gate(tmp_path: Path, malicious_pick
     assert report.max_severity == Severity.CRITICAL
     assert report.fails(Severity.HIGH)
     assert report.fails(Severity.CRITICAL)
+
+
+def test_flags_malicious_zip_container_pt_file(malicious_pt_zip: Path) -> None:
+    findings = PickleDetector().scan(malicious_pt_zip)
+    assert findings
+    assert any(f.severity == Severity.CRITICAL for f in findings)
+    assert any("data.pkl" in (f.file or "") for f in findings)
+
+
+def test_benign_zip_container_pt_file_has_no_findings(benign_pt_zip: Path) -> None:
+    assert PickleDetector().scan(benign_pt_zip) == []

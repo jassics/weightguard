@@ -14,6 +14,15 @@ class UnresolvableTarget(Exception):
     pass
 
 
+def hf_repo_id(target: str) -> str | None:
+    """Return the Hugging Face repo id if `target` is an HF repo URL, else None."""
+    parsed = urlparse(target)
+    if parsed.scheme in ("http", "https") and parsed.netloc == HF_HOST:
+        match = _HF_REPO_RE.match(parsed.path)
+        return match.group("repo_id") if match else None
+    return None
+
+
 def resolve(target: str) -> Path:
     """Resolve a CLI target (HF repo URL, generic git URL, or local path) to a
     local directory. Never executes/imports any downloaded file — this stage

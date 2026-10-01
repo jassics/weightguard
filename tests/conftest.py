@@ -120,6 +120,64 @@ def onnx_custom_op_model(tmp_path: Path):
 
 
 @pytest.fixture()
+def malicious_npy(tmp_path: Path) -> Path:
+    p = tmp_path / "weights.npy"
+    arr = np.array([_EicarPayload()], dtype=object)
+    np.save(p, arr, allow_pickle=True)
+    return p
+
+
+@pytest.fixture()
+def benign_npy(tmp_path: Path) -> Path:
+    p = tmp_path / "weights.npy"
+    np.save(p, np.zeros((2, 2), dtype=np.float32))
+    return p
+
+
+@pytest.fixture()
+def malicious_npz(tmp_path: Path) -> Path:
+    p = tmp_path / "weights.npz"
+    np.savez(p, a=np.zeros((2, 2)), b=np.array([_EicarPayload()], dtype=object))
+    return p
+
+
+@pytest.fixture()
+def malicious_joblib(tmp_path: Path) -> Path:
+    p = tmp_path / "model.joblib"
+    p.write_bytes(pickle.dumps(_EicarPayload()))
+    return p
+
+
+@pytest.fixture()
+def benign_joblib(tmp_path: Path) -> Path:
+    p = tmp_path / "model.joblib"
+    p.write_bytes(pickle.dumps({"coef": [0.1, 0.2]}))
+    return p
+
+
+@pytest.fixture()
+def malicious_pt_zip(tmp_path: Path) -> Path:
+    import zipfile
+
+    p = tmp_path / "model.pt"
+    with zipfile.ZipFile(p, "w") as zf:
+        zf.writestr("archive/data.pkl", pickle.dumps(_EicarPayload()))
+        zf.writestr("archive/data/0", b"\x00" * 16)
+    return p
+
+
+@pytest.fixture()
+def benign_pt_zip(tmp_path: Path) -> Path:
+    import zipfile
+
+    p = tmp_path / "model.pt"
+    with zipfile.ZipFile(p, "w") as zf:
+        zf.writestr("archive/data.pkl", pickle.dumps({"layer1": [0.1, 0.2]}))
+        zf.writestr("archive/data/0", b"\x00" * 16)
+    return p
+
+
+@pytest.fixture()
 def gguf_valid_model(tmp_path: Path) -> Path:
     import gguf
 

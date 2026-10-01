@@ -31,10 +31,47 @@ weightguard scan /path/to/model
 
 # CI gate — exit non-zero only above a severity threshold (default: HIGH)
 weightguard scan <target> --fail-on CRITICAL
+
+# machine-readable output
+weightguard scan <target> --format json
+weightguard scan <target> --format sarif   # GitHub code scanning / GitLab SAST
+
+# skip Hugging Face repo-metadata signals or the .weightguard.yml allowlist
+weightguard scan <target> --no-provenance --no-apply-policy
 ```
 
 Exit codes: `0` clean, `1` a finding at/above `--fail-on`, `2` target could
 not be resolved.
+
+## Provenance signals
+
+For Hugging Face targets, `weightguard` also surfaces supply-chain/trust
+signals from the repo's public metadata — not a static-analysis finding, but
+context that should change how much you trust an otherwise-clean file: repo
+age, download count, declared license, gated status, and Hugging Face's own
+`security_repo_status`. These show up in `report.provenance` / a separate
+table in the CLI, and count toward `--fail-on`.
+
+## Policy / allowlisting
+
+Drop a `.weightguard.yml` next to the scan target to suppress specific,
+reviewed findings — required for any team running this in a blocking CI gate
+without constant false-positive friction:
+
+```yaml
+allow:
+  - detector: pickle-fickling
+    file: "models/legacy_embedding.pt"
+    reason: "Reviewed 2026-01-10 by security team; legacy internal model, no untrusted input."
+    expires: 2026-07-01   # optional — omit for no expiry
+  - detector: keras-lambda-layer
+    file: "*.h5"
+    sha256: "<pin to an exact file, optional>"
+    reason: "Known Lambda layer, source-reviewed."
+```
+
+Expired allowances stop suppressing automatically (fail closed). A missing
+`.weightguard.yml` is a no-op.
 
 ## Use as a library
 
@@ -69,11 +106,18 @@ report = scan_path(path)
 `scan_path` never executes or deserializes the target files — it's pure
 static analysis, safe to run against untrusted artifacts.
 
+Every `Report` also carries `report.files` (a sha256 + size manifest of every
+scanned file — an audit trail of exactly what was scanned) and
+`report.provenance` (supply-chain signals, see below). Serialize either with
+`weightguard.report_format.to_json`/`to_sarif`.
+
 ## What it checks today
 
 | Format | Detector | Technique |
 |---|---|---|
-| Pickle / PyTorch (`.pkl`, `.bin`, `.pt`, `.pth`) | Fickling AST analysis | Detects arbitrary-code-execution opcode chains; resistant to the malformed-opcode-stream evasion that defeats denylist scanners |
+| Pickle / PyTorch (`.pkl`, `.bin`, `.pt`, `.pth`) | Fickling AST analysis | Detects arbitrary-code-execution opcode chains, including inside modern zip-container `torch.save()` archives (`data.pkl`); resistant to the malformed-opcode-stream evasion that defeats denylist scanners |
+| NumPy (`.npy`, `.npz`) | Object-dtype + Fickling | Flags arrays with an object dtype (require `allow_pickle=True` to load) and analyzes the embedded pickle stream |
+| Joblib (`.joblib`, `.jbl`) | Fickling AST analysis | joblib dumps are pickle under the hood; same AST analysis as the pickle detector, with optional zlib decompression |
 | SafeTensors | Format check | Flags files that fail to parse as valid SafeTensors (renamed/spoofed files) |
 | Keras (`.h5`, `.keras`) | Lambda-layer check | Flags `Lambda` layers, which embed a marshalled Python function executed on load |
 | ONNX | Custom-op check | Flags graphs referencing non-standard operator domains (native-code load surface) |

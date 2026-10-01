@@ -1,7 +1,7 @@
 [project]
 name = "weightguard"
-version = "0.1.2"
-description = "Multi-format security scanner for ML model artifacts: pickle/PyTorch, Keras Lambda-layer, ONNX custom-op, and GGUF header checks."
+version = "0.2.0"
+description = "Multi-format security scanner for ML model artifacts: pickle/PyTorch (incl. zip-container), NumPy, Joblib, Keras Lambda-layer, ONNX custom-op, and GGUF header checks."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -20,6 +20,7 @@ dependencies = [
     "gguf>=0.19.0",
     "h5py>=3.16.0",
     "onnx>=1.22.0",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]

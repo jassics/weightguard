@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from weightguard.detectors import ALL_DETECTORS
+from weightguard.manifest import build_file_records
 from weightguard.models import Report
 
 
@@ -16,4 +17,5 @@ def scan_path(target: Path) -> Report:
             if detector.applies_to(file):
                 report.findings.extend(detector.scan(file))
 
+    report.files = build_file_records(files, base=target)
     return report
